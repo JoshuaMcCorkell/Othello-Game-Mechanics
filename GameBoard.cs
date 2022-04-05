@@ -65,6 +65,7 @@
 
         /// <summary>
         /// Tests whether a move on the given space is legal.
+        /// This method does not alter the GameBoard.
         /// </summary>
         /// <param name="column">The column of the potential move.</param>
         /// <param name="row">The row of the potential move.</param>
@@ -107,36 +108,27 @@
         }
 
         /// <summary>
-        /// Checks if a token, placed at position 0 in line <c>line</c> will turn over any tokens, 
-        /// therefore being a legal move. The token must be placed in position 0, and any tokens come afterwards.
+        /// Checks if a token, placed at relative position -1 in line <c>line</c> will turn over any tokens, 
+        /// therefore being a legal move. The token must be placed in position -1 (relative to the array), 
+        /// and any tokens come afterwards (i.e, in the line array). This essential means, the <c>line</c> array
+        /// represents the tokens that come AFTER the token in the line.
         /// </summary>
         /// <param name="token">The token that will be potentially placed.</param>
         /// <param name="line">An integer array with the line that needs checking.</param>
         /// <returns>True if the move is legal in the specified line, false if not.</returns>
         protected internal bool IsLegalMoveInShortLine(int token, int[] line) {
             int n = (token == 1)? 1 : -1; 
-            // This is so the code works when checking both light and dark.
-            bool other = false; 
-            // This flag checks if, in the current search, tokens of the other type have been found.
-                                
+            // This is so the code works when checking both light and dark.   
             for (var i = 0; i < line.Length; i++) 
             {
                 int token1 = line[i] * n; 
-                if (token1 == -1) 
-                {   // A token of the other type is found in the current search.
-                    other = true;
-                    continue;
-                }
-                if (token1 == 0) break;
-                // If a blank space is reached, then no tokens will be turned over.
-                if (token1 == 1) 
-                {   // A token of the same type is found. If this was found after tokens of the other type, 
-                    // Then the potential move is legal. If not, no tokens will be turned over.
-                    if (other) return true;
-                    else break;
-                }
+                if (token1 == 0) return false;
+                if (token1 == 1) return i > 0;
+                // Token of the same-type AFTER tokens of other-type: true, all other cases: false.
+                // This works because if a non-other token is encountered, the loop will 
+                // always end. So if i > 0, other-type tokens were found in the line.
             }
-            // If the loop was ended, or broken, no tokens will be turned over.
+            // If the loop was ended, no tokens will be turned over.
             return false;
         }
 
@@ -167,7 +159,7 @@
         }
 
         /// <summary>
-        /// Prints the GameBoard to stdout.
+        /// Prints the GameBoard to the Console.
         /// </summary>
         public void Print() 
         {
@@ -186,7 +178,7 @@
         {
             GameBoard g = new GameBoard(8, 8);
             g.Print();
-            Console.WriteLine(g.IsLegal(2, 3, -1));
+            Console.WriteLine(g.IsLegal(3, 5, 1));
         }
     }
 }
